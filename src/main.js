@@ -36,7 +36,7 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
 
-// register global utility filters
+// 全局过滤器工具  参考 https://cn.vuejs.org/v2/guide/filters.html
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })
