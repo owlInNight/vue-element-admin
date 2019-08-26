@@ -11,7 +11,7 @@ import componentsRouter from './modules/components';
 import chartsRouter from './modules/charts';
 import tableRouter from './modules/table';
 import nestedRouter from './modules/nested';
-
+import baseData from './modules/base-data';
 /**
  * Note: sub-menu only appear when route children.length >= 1
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -129,44 +129,7 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
-    path: '/baseData', // 基础数据管理
-    component: Layout,
-    redirect: '/baseData/user',
-    alwaysShow: false,
-    name: 'BaseData',
-    meta: {
-      title: '基础信息管理',
-      icon: 'table',
-      roles: ['admin']
-    },
-    children: [
-      //  子菜单
-      {
-        //    路径
-        path: 'user',
-        component: () => import('@/views/base-data/user/user'),
-        name: 'User',
-        meta: {
-          icon: 'peoples',
-          title: '用户管理',
-          roles: ['admin']
-        }
-      },
-      //  子菜单
-      {
-        //    路径
-        path: 'role',
-        component: () => import('@/views/permission/page'),
-        name: 'Role',
-        meta: {
-          icon: 'lock',
-          title: '权限管理',
-          roles: ['admin']
-        }
-      }
-    ]
-  },
+  baseData,
   {
     //  路径
     path: '/permission',
