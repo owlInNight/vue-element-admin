@@ -29,7 +29,7 @@ const baseData = {
     {
       //    路径
       path: 'role',
-      component: () => import('@/views/permission/page'),
+      component: () => import('@/views/base-data/role/list'),
       name: 'Role',
       meta: {
         icon: 'lock',

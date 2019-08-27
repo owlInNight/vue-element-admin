@@ -6,7 +6,13 @@ export function getRoutes() {
     method: 'get'
   })
 }
-
+export function rolePage(params) {
+  return request({
+    url: '/roles/page',
+    method: 'get',
+    params
+  })
+}
 export function getRoles() {
   return request({
     url: '/roles',
@@ -16,7 +22,7 @@ export function getRoles() {
 
 export function addRole(data) {
   return request({
-    url: '/role',
+    url: '/roles',
     method: 'post',
     data
   })

@@ -11,13 +11,11 @@
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
       <el-table-column type="index" width="50" />
       <el-table-column label="用户姓名" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <span>{{ scope.row.username }}</span>
-        </template>
+        <template slot-scope="scope">{{ scope.row.username }} </template>
       </el-table-column>
       <el-table-column label="密码" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ scope.row.password }}</span>
+          {{ scope.row.password }}
         </template>
       </el-table-column>
       <el-table-column label="是否启用" align="center" class-name="small-padding fixed-width">
@@ -30,12 +28,12 @@
       </el-table-column>
       <el-table-column label="登陆账号" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ scope.row.userAccount }}</span>
+          {{ scope.row.userAccount }}
         </template>
       </el-table-column>
       <el-table-column label="用户代码" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ scope.row.code }}</span>
+          {{ scope.row.code }}
         </template>
       </el-table-column>
 
@@ -46,50 +44,15 @@
         </template>
       </el-table-column>
     </el-table>
-
-    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.size" @pagination="getList" />
     <!-- 封装成模块的模式 -->
-    <el-dialog width="30%" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" class="user-form" :rules="rules" :model="temp" visible label-position="left" label-width="15%" size="small">
-        <el-form-item label="姓名" prop="username">
-          <el-input v-model="temp.username" />
-        </el-form-item>
-        <el-form-item label="代码" prop="code">
-          <el-input v-model="temp.code" />
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="temp.password" />
-        </el-form-item>
-        <el-form-item label="账号" prop="userAccount">
-          <el-input v-model="temp.userAccount" />
-        </el-form-item>
-        <el-form-item label="账号" prop="userAccount">
-          <el-radio-group v-model="temp.enabled" size="medium">
-            <el-radio-button :label="true">启用</el-radio-button>
-            <el-radio-button :label="false">禁用</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus === 'create' ? createData() : updateData()">提交</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <UserView :data="viewData" :dialog-form-visible="dialogFormVisible" :submit-type="dialogStatus" @hideDialog="hideDialog" @submitEnd="submitEnd" />
   </div>
 </template>
 
 <script>
 import { page, createUser } from "@/api/user";
+import UserView from "./UserView";
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
@@ -98,7 +61,10 @@ import Pagination from "@/components/Pagination"; // secondary package based on 
 const rules = {
   username: [{ required: true, message: "用户名不可为空", trigger: "change" }]
 };
-
+const VIEW_TYPE = {
+  CREATE: "CREATE",
+  UPDATE: "UPDATE"
+};
 const methods = {
   enabledChange(row) {
     const temp = Object.assign({}, row);
@@ -116,7 +82,6 @@ const methods = {
   getList() {
     this.listLoading = true;
     page(this.listQuery).then(response => {
-      console.log(response);
       const { content, totalElements } = response.data;
       this.list = content;
       this.total = totalElements;
@@ -124,74 +89,25 @@ const methods = {
     });
   },
   handleFilter() {
-    this.listQuery.page = 1;
+    this.listQuery.page = 0;
     this.getList();
   },
-  resetTemp() {
-    this.temp = {
-      id: undefined,
-      username: undefined,
-      code: undefined,
-      password: "123456",
-      userAccount: undefined,
-      enabled: true
-    };
-  },
   handleCreate() {
-    this.resetTemp();
-    this.dialogStatus = "create";
+    this.dialogStatus = VIEW_TYPE.CREATE;
     this.dialogFormVisible = true;
-    this.$nextTick(() => {
-      this.$refs["dataForm"].clearValidate();
-    });
-  },
-  createData() {
-    this.$refs["dataForm"].validate(valid => {
-      if (valid) {
-        createUser(this.temp).then(() => {
-          this.list.unshift(this.temp);
-          this.dialogFormVisible = false;
-          this.getList();
-          this.$notify({
-            title: "成功",
-            message: "创建成功",
-            type: "success",
-            duration: 2000
-          });
-        });
-      }
-    });
   },
   handleUpdate(row) {
-    this.temp = Object.assign({}, row); // copy obj
-    this.dialogStatus = "update";
+    this.viewData = Object.assign({}, row);
+    this.dialogStatus = VIEW_TYPE.UPDATE;
     this.dialogFormVisible = true;
-    this.$nextTick(() => {
-      this.$refs["dataForm"].clearValidate();
-    });
   },
-  updateData() {
-    this.$refs["dataForm"].validate(valid => {
-      if (valid) {
-        const tempData = Object.assign({}, this.temp);
-        createUser(tempData).then(() => {
-          for (const v of this.list) {
-            if (v.id === this.temp.id) {
-              const index = this.list.indexOf(v);
-              this.list.splice(index, 1, this.temp);
-              break;
-            }
-          }
-          this.dialogFormVisible = false;
-          this.$notify({
-            title: "Success",
-            message: "Update Successfully",
-            type: "success",
-            duration: 2000
-          });
-        });
-      }
-    });
+  submitEnd(result) {
+    this.dialogFormVisible = false;
+    this.listQuery.page = 0;
+    this.getList();
+  },
+  hideDialog() {
+    this.dialogFormVisible = false;
   },
   handleDownload() {
     this.downloadLoading = true;
@@ -225,39 +141,26 @@ const filters = {
   }
 };
 export default {
-  name: "ComplexTable",
-  components: { Pagination },
+  name: "User",
+  components: { Pagination, UserView },
   directives: { waves },
   filters,
   data() {
     return {
+      viewData: undefined,
       tableKey: 0,
       list: null,
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
+        page: 0,
+        size: 5,
         username: undefined,
         enable: undefined,
         code: undefined
       },
-      temp: {
-        id: undefined,
-        username: 1,
-        code: undefined,
-        password: "123456",
-        userAccount: undefined,
-        enabled: true
-      },
       dialogFormVisible: false,
       dialogStatus: "",
-      textMap: {
-        update: "修改",
-        create: "新增"
-      },
-      dialogPvVisible: false,
-      pvData: [],
       rules,
       downloadLoading: false
     };
