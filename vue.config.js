@@ -1,5 +1,5 @@
 'use strict';
-/*主要现象配置 */
+/* 主要现象配置 */
 
 const path = require('path');
 const defaultSettings = require('./src/settings.js');

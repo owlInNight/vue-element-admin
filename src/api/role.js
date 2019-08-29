@@ -13,10 +13,11 @@ export function rolePage(params) {
     params
   })
 }
-export function getRoles() {
+export function getRoles(params) {
   return request({
     url: '/roles',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
@@ -42,3 +43,4 @@ export function deleteRole(id) {
     method: 'delete'
   })
 }
+

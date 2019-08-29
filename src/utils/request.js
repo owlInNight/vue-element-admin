@@ -29,7 +29,6 @@ service.interceptors.request.use(
     const statusCode = error.response.status;
     if (statusCode === 401 && error.response.data.error === 'invalid_token') {
       // Token失效
-      console.log('invalid_token');
       window.localStorage.removeItem('accessToken');
       store.dispatch('updateLoginUser');
       router.push('/login');

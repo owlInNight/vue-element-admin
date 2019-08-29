@@ -19,6 +19,14 @@ export function login(data) {
   });
 }
 
+export function getUser(params) {
+  return request({
+    url: '/user',
+    method: 'get',
+    params
+  })
+}
+
 export function getInfo() {
   return request({
     url: '/user/info',
@@ -47,4 +55,11 @@ export function createUser(user) {
     method: 'post',
     data: user
   });
+}
+
+export function deleteUser(id) {
+  return request({
+    url: `/user/${id}`,
+    method: 'delete'
+  })
 }
